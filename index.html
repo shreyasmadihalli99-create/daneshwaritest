@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Daneshwari - Menu</title>
+    <style>
+        :root {
+            --primary: #d32f2f;
+            --accent: #ff9800;
+            --bg: #fffbf5;
+            --text: #333;
+            --white: #ffffff;
+            --gray: #f4f4f4;
+            --danger: #e74c3c;
+            --success: #27ae60;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- SECRET ADMIN STAR --- */
+        #admin-star {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 50px;
+            height: 50px;
+            z-index: 9999;
+            opacity: 0; /* Completely invisible to customers */
+            cursor: pointer;
+        }
+
+        /* --- ADMIN PANEL SYSTEM --- */
+        #admin-panel {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            z-index: 10000;
+            padding: 20px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        .admin-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
+        .status-btn { padding: 8px 15px; border: none; border-radius: 5px; color: white; font-weight: bold; cursor: pointer; }
+        .btn-on { background: var(--success); }
+        .btn-off { background: var(--danger); }
+
+        #hero-page {
+            height: 100vh;
+            width: 100%;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                        url('https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=1500&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 3000;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #hero-page.hidden { transform: translateY(-100%); }
+
+        .explore-btn {
+            margin-top: 25px;
+            background: var(--accent);
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        #menu-page {
+            display: none;
+            max-width: 900px;
+            margin: 0 auto;
+            padding-bottom: 450px;
+        }
+
+        .tabs-container {
+            position: sticky;
+            top: 0;
+            background: var(--white);
+            display: flex;
+            overflow-x: auto;
+            padding: 15px;
+            gap: 10px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            scrollbar-width: none;
+        }
+        .tabs-container::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            background: var(--gray);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            white-space: nowrap;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .category-img-wrapper {
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .category-banner {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 15px;
+            background-color: #eee;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .menu-section { padding: 0 15px; }
+        .category-header {
+            color: var(--primary);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--white);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .item-name { font-weight: 700; flex: 2; font-size: 0.95rem; }
+        .price-align { font-weight: bold; color: var(--primary); margin-right: 15px; }
+
+        .qty-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--gray);
+            padding: 5px 8px;
+            border-radius: 20px;
+        }
+        .qty-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cart-popup {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+            width: 100%;
+            max-width: 500px;
+            background: var(--white);
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.2);
+            border-top-left-radius: 25px;
+            border-top-right-radius: 25px;
+            padding: 20px;
+            transition: transform 0.4s ease;
+            z-index: 4000;
+            box-sizing: border-box;
+        }
+        .cart-popup.active { transform: translateX(-50%) translateY(0); }
+
+        .delivery-input {
+            width: 100%; padding: 12px; margin-bottom: 10px; 
+            border: 1.5px solid #eee; border-radius: 10px;
+            font-size: 1rem; box-sizing: border-box; outline: none;
+        }
+
+        .loc-btn {
+            background: #2196F3; color: white; border: none; padding: 12px;
+            width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 15px;
+        }
+        .loc-btn.verified { background: #2e7d32; }
+
+        .checkout-btn {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: none; 
+        }
+
+        .fee-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        #success-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            z-index: 5000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="admin-star" onclick="openAdmin()"></div>
+
+    <div id="admin-panel">
+        <div id="admin-login-screen">
+            <h2>Admin Login</h2>
+            <input type="password" id="admin-pass-input" class="delivery-input" placeholder="Enter Secret Code">
+            <button class="checkout-btn" style="display:block;" onclick="checkAdminCode()">Login</button>
+            <button class="checkout-btn" style="display:block; background:#666; margin-top:10px;" onclick="closeAdmin()">Cancel</button>
+        </div>
+
+        <div id="admin-stock-content" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0;">Stock Manager</h2>
+                <button onclick="closeAdmin()" style="padding:10px; background:#333; color:white; border:none; border-radius:5px;">EXIT</button>
+            </div>
+            <div id="admin-list"></div>
+        </div>
+    </div>
+
+    <div id="success-overlay">
+        <h2 style="color: #2e7d32;">✔ Order Placed Successfully!</h2>
+        <p>Your order has been sent to Hotel Daneshwari.</p>
+        <button class="explore-btn" onclick="location.reload()">Back to Menu</button>
+    </div>
+
+    <section id="hero-page">
+        <h1 style="font-size: 2.8rem; margin-bottom: 0;">Hotel Daneshwari</h1>
+        <p style="font-size: 1.2rem; margin-top: 10px;">Authentic Taste</p>
+        <button class="explore-btn" onclick="openMenu()">Explore Menu</button>
+    </section>
+
+    <main id="menu-page">
+        <div class="tabs-container" id="tabs"></div>
+
+        <div class="category-img-wrapper">
+            <img id="category-image" class="category-banner" src="" alt="Category Banner">
+        </div>
+
+        <div class="menu-section">
+            <h2 id="current-category-name" class="category-header">Morning</h2>
+            <div id="menu-items-container"></div>
+        </div>
+
+        <div class="cart-popup" id="cart-popup">
+            <div style="font-weight:bold; border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom: 10px;">Delivery Details</div>
+            
+            <input type="text" id="cust-name" class="delivery-input" placeholder="Your Name (Letters Only)" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
+            <input type="tel" id="cust-phone" class="delivery-input" placeholder="Mobile Number (10 Digits Only)" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+
+            <button class="loc-btn" id="loc-btn" onclick="getLocation()">📍 Share Location (Required)</button>
+
+            <div id="cart-items-container" style="max-height: 15vh; overflow-y: auto; margin-bottom: 10px;"></div>
+            
+            <div class="fee-row"><span>Convenience Fee</span><span>₹5</span></div>
+            <div class="fee-row"><span>Delivery Charge</span><span>₹10</span></div>
+
+            <div style="display:flex; justify-content:space-between; font-weight:bold; color:var(--primary); font-size:1.3rem; margin: 10px 0;">
+                <span>Total</span>
+                <span>₹<span id="cart-grand-total">0</span></span>
+            </div>
+            
+            <button id="order-btn" class="checkout-btn" onclick="checkoutOrder()">Place Order</button>
+        </div>
+    </main>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2CcnPwPfW3lFfxQKf7x0-oarxx28K4K2INt8yFAl1d5hwdCwJpITJdFYJxrOuDwDm/exec";
+    
+    let userLocationURL = "";
+    let disabledItems = JSON.parse(localStorage.getItem('daneshwari_stock')) || {};
+
+    const menu = {
+        "Morning": [
+            {name: "Poha", price: 25},
+            {name: "Chapati Baji (Full)", price: 50},
+            {name: "Chapati Baji (Half)", price: 35},
+            {name: "Pori Baji (Full)", price: 60},
+            {name: "Pori Baji (Half)", price: 40},
+            {name: "Palav (Full)", price: 50},
+            {name: "Palav (Half)", price: 35},
+            {name: "Misal", price: 60}
+        ],
+        "Snacks items": [
+            {name: "Shenga", price: 40},
+            {name: "Badanga", price: 40},
+            {name: "Mix", price: 70}
+        ],
+        "Evening Special": [
+            {name: "Vada pav", price: 15},
+            {name: "Mirchi bhaji (Full)", price: 40},
+            {name: "Mirchi bhaji (Half)", price: 25}
+        ]
+    };
+
+    const categoryImages = {
+        "Morning": "https://i1.wp.com/shikhaskitchen.com/wp-content/uploads/2020/09/IMG-3528-scaled.jpg?zoom=3&resize=800%2C530&ssl=1",
+        "Snacks items": "https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=800&q=80",
+        "Evening Special": "https://tse3.mm.bing.net/th/id/OIP.aX__E5segrGNw8XFRJH-yQHaEK?pid=Api&P=0&h=180"
+    };
+
+    let cart = {};
+    const CONVENIENCE_FEE = 5;
+    const DELIVERY_CHARGE = 10;
+
+    // --- ADMIN LOGIC ---
+    function openAdmin() {
+        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('admin-login-screen').style.display = 'block';
+        document.getElementById('admin-stock-content').style.display = 'none';
+    }
+
+    function checkAdminCode() {
+        if (document.getElementById('admin-pass-input').value === "20106669") {
+            document.getElementById('admin-login-screen').style.display = 'none';
+            document.getElementById('admin-stock-content').style.display = 'block';
+            loadAdminList();
+        } else { alert("Wrong Code!"); }
+    }
+
+    function loadAdminList() {
+        const list = document.getElementById('admin-list');
+        list.innerHTML = "";
+        for(let cat in menu) {
+            list.innerHTML += `<h3 style="background:#eee; padding:8px;">${cat}</h3>`;
+            menu[cat].forEach(item => {
+                const isOff = disabledItems[item.name];
+                list.innerHTML += `<div class="admin-row"><span>${item.name}</span><button class="status-btn ${isOff?'btn-off':'btn-on'}" onclick="toggleItem('${item.name}', this)">${isOff?'OFF':'ON'}</button></div>`;
+            });
+        }
+    }
+
+    function toggleItem(name, btn) {
+        if(disabledItems[name]) { delete disabledItems[name]; btn.innerText="ON"; btn.className="status-btn btn-on"; }
+        else { disabledItems[name]=true; btn.innerText="OFF"; btn.className="status-btn btn-off"; }
+        localStorage.setItem('daneshwari_stock', JSON.stringify(disabledItems));
+    }
+
+    function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; location.reload(); }
+
+    function openMenu() {
+        document.getElementById('hero-page').classList.add('hidden');
+        setTimeout(() => {
+            document.getElementById('hero-page').style.display = 'none';
+            document.getElementById('menu-page').style.display = 'block';
+        }, 600);
+    }
+
+    function renderTabs() {
+        const container = document.getElementById('tabs');
+        Object.keys(menu).forEach((cat, i) => {
+            const btn = document.createElement('button');
+            btn.className = `tab-btn ${i === 0 ? 'active' : ''}`;
+            btn.innerText = cat;
+            btn.onclick = () => switchCategory(cat, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    function switchCategory(cat, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('current-category-name').innerText = cat;
+        document.getElementById('category-image').src = categoryImages[cat];
+        renderItems(cat);
+    }
+
+    function renderItems(cat) {
+        const container = document.getElementById('menu-items-container');
+        container.innerHTML = '';
+        menu[cat].forEach(item => {
+            if(disabledItems[item.name]) return; // Skip if disabled
+            const currentQty = cart[item.name] ? cart[item.name].qty : 0;
+            const div = document.createElement('div');
+            div.className = 'menu-item';
+            div.innerHTML = `
+                <div class="item-name">${item.name}</div>
+                <div class="price-align">₹${item.price}</div>
+                <div class="qty-box">
+                    <button class="qty-btn" onclick="updateCart('${item.name}', ${item.price}, -1)">-</button>
+                    <span>${currentQty}</span>
+                    <button class="qty-btn" onclick="updateCart('${item.name}', ${item.price}, 1)">+</button>
+                </div>`;
+            container.appendChild(div);
+        });
+    }
+
+    function updateCart(name, price, change) {
+        if(!cart[name]) cart[name] = {qty: 0, price: price};
+        if (cart[name].qty === 0 && change === -1) return;
+        cart[name].qty += change;
+        renderItems(document.getElementById('current-category-name').innerText);
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        let itemsSubtotal = 0; let cartHTML = ''; let count = 0;
+        for (let key in cart) {
+            if (cart[key].qty > 0) {
+                count++;
+                let itemTotal = cart[key].qty * cart[key].price;
+                itemsSubtotal += itemTotal;
+                cartHTML += `<div style="display:flex; justify-content:space-between; font-size:0.9rem;"><span>${key} x ${cart[key].qty}</span><span>₹${itemTotal}</span></div>`;
+            }
+        }
+        document.getElementById('cart-items-container').innerHTML = cartHTML;
+        document.getElementById('cart-grand-total').innerText = itemsSubtotal > 0 ? (itemsSubtotal + CONVENIENCE_FEE + DELIVERY_CHARGE) : 0;
+        document.getElementById('cart-popup').classList.toggle('active', count > 0);
+    }
+
+    function getLocation() {
+        const btn = document.getElementById('loc-btn');
+        if (navigator.geolocation) {
+            btn.innerText = "🛰️ Locating...";
+            navigator.geolocation.getCurrentPosition((pos) => {
+                userLocationURL = `http://googleusercontent.com/maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                btn.innerText = "✅ Location Locked";
+                btn.classList.add('verified');
+                document.getElementById('order-btn').style.display = 'block';
+            }, () => alert("Please enable GPS."), {enableHighAccuracy: true});
+        }
+    }
+
+    // --- NEW CHECKOUT LOGIC ---
+    async function checkoutOrder() {
+        const name = document.getElementById('cust-name').value.trim();
+        const phone = document.getElementById('cust-phone').value.trim();
+
+        if(!name || phone.length < 10) return alert("Fill Name & Mobile.");
+
+        const grandTotal = document.getElementById('cart-grand-total').innerText;
+
+        let orderSummary = "";
+        for (let k in cart) {
+            if(cart[k].qty > 0) {
+                orderSummary += `${k}(x${cart[k].qty}), `;
+            }
+        }
+
+        const payload = {
+            hotel: "Hotel Daneshwari", // Adjusted for this specific page
+            name: name,
+            phone: phone,
+            items: orderSummary.slice(0, -2),
+            total: "₹" + grandTotal,
+            location: userLocationURL
+        };
+
+        const btn = document.getElementById('order-btn'); // Matched ID
+        btn.innerText = "Processing...";
+        btn.disabled = true;
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            document.getElementById('success-overlay').style.display = 'flex'; // Matched ID
+
+        } catch (e) {
+            alert("Error. Try again.");
+            btn.disabled = false;
+            btn.innerText = "Place Order";
+        }
+    }
+
+    renderTabs();
+    renderItems("Morning");
+    document.getElementById('category-image').src = categoryImages["Morning"];
+</script>
+</body>
+</html>
